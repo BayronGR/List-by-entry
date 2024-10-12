@@ -1,7 +1,24 @@
-/* exported gapiLoaded */
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Sheets API Quickstart</title>
+    <meta charset="utf-8" />
+  </head>
+  <body>
+    <p>Sheets API Quickstart</p>
+
+    <!--Add buttons to initiate auth sequence and sign out-->
+    <button id="authorize_button" onclick="handleAuthClick()">Authorize</button>
+    <button id="signout_button" onclick="handleSignoutClick()">Sign Out</button>
+
+    <pre id="content" style="white-space: pre-wrap;"></pre>
+
+    <script type="text/javascript">
+      /* exported gapiLoaded */
       /* exported gisLoaded */
       /* exported handleAuthClick */
       /* exported handleSignoutClick */
+      let asist;
 
       // TODO(developer): Set to client ID and API key from the Developer Console
       const CLIENT_ID = '569050667099-6kd1jgv51ckt5jr6nv8sgf62b1a3tqf3.apps.googleusercontent.com';
@@ -18,8 +35,6 @@
       let gapiInited = false;
       let gisInited = false;
 
-      document.getElementById('gapi').addEventListener('Load', gapiInited());
-      document.getElementById('gis').addEventListener('Load', gisInited());
       document.getElementById('authorize_button').style.visibility = 'hidden';
       document.getElementById('signout_button').style.visibility = 'hidden';
 
@@ -75,7 +90,7 @@
           }
           document.getElementById('signout_button').style.visibility = 'visible';
           document.getElementById('authorize_button').innerText = 'Refresh';
-          await getAsist();
+          await listMajors();
         };
 
         if (gapi.client.getToken() === null) {
@@ -102,36 +117,40 @@
         }
       }
 
-      async function getAsist()
-{
-    try {
-        // Fetch first 10 files
-        response = await gapi.client.sheets.spreadsheets.values.get({
-          spreadsheetId: '1s7USlF57KrEAkYsJPWvmfcrqmWs2GXnPaB-NZEyeKc4',
-          range: 'Asistencia Data!A:D',
+      async function listMajors() {
+        let response;
+        try {
+          // Fetch first 10 files
+          response = await gapi.client.sheets.spreadsheets.values.get({
+            spreadsheetId: '1s7USlF57KrEAkYsJPWvmfcrqmWs2GXnPaB-NZEyeKc4',
+            range: 'Asistencia!A:D',
+          });
+        } catch (err) {
+          document.getElementById('content').innerText = err.message;
+          return;
+        }
+        const range = response.result;
+        if (!range || !range.values || range.values.length == 0) {
+          document.getElementById('content').innerText = 'No values found.';
+          return;
+        }
+        // Flatten to string to display
+        asist = [];
+        console.log(range.values)
+        range.values.forEach(item => {
+          const element = {
+            Id: item[0],
+            Grupo: item[1],
+            Estado: item[2],
+            hora_terminado: item[3]
+          }
+          asist.push(element)
         });
-      } catch (err) {
-        document.getElementById('content').innerText = err.message;
-        return;
-      }
-      const range = response.result;
-      if (!range || !range.values || range.values.length == 0) {
-        document.getElementById('content').innerText = 'No values found.';
-        return;
-      }
-      
-      asist = [];
-      range.values.forEach(fila => {
-        if(isNaN(parseInt(fila[0])) || fila[3] !== undefined) return;
 
-        const newAsist = {
-            Id:fila[0],
-            Grupo: fila[1],
-            Estado: fila[2],
-            fecha_terminado: fila[3]
-        };
-
-        asist.push(newAsist);
-      });
-      console.log(asist);
-}
+        console.log(asist)
+      }
+    </script>
+    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+  </body>
+</html>
