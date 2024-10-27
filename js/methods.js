@@ -28,6 +28,24 @@ async function getGroups() {
     }
   }
   
+  async function getCounts() {
+    try {
+      const scriptUrl = 'https://script.google.com/macros/s/AKfycbygM4x-Y3-sekFxrHjt35U88Smq5-q2S6slvq3ElegKdBzLaCLlVSfEx4ujCeE5E67S2Q/exec';
+      const response = await fetch(scriptUrl);
+      
+      if (!response.ok) {
+        throw new Error("Error en la solicitud");
+      }
+  
+      const data = await response.json();
+      return data;
+  
+    } catch (error) {
+      console.error("Error al obtener los datos:", error);
+      return []; // Retornar un arreglo vacío en caso de error
+    }
+  }
+
   function createGroupStats(registered, pending, attended) {
     const nav = document.createElement('nav');
     nav.className = "level";
@@ -97,14 +115,34 @@ async function getGroups() {
 }
   
   document.addEventListener("DOMContentLoaded", async function() {
+    const loadingElement = document.getElementById('loading');
+
+    loadingElement.style.display = 'block';
+    
+    const bodyChildren = document.body.children;
+    for (let i = 0; i < bodyChildren.length; i++) {
+      const child = bodyChildren[i];
+      if (child !== loadingElement) {
+        child.style.display = 'none'; // Ocultar otros elementos
+      }
+    }
+
+    const data = await getCounts();
     const messages = await getGroups(); // Esperar a que se obtengan los mensajes
-    createGroupStats(20, 5, 15); // Puedes cambiar estos números según los datos reales
+    createGroupStats(data.TotalRecords, data.PendingRecords, data.AttempRecords); // Puedes cambiar estos números según los datos reales
   
     console.log(messages); // Para verificar que se obtienen los mensajes
   
     messages.forEach(msg => createMessage(msg.title, msg.body));
 
+    loadingElement.style.display = 'none';
 
+    for (let i = 0; i < bodyChildren.length; i++) {
+      const child = bodyChildren[i];
+      if (child !== loadingElement) {
+        child.style.display = ''; // Restablecer el estilo para mostrar el elemento
+      }
+    }
     // Agregar evento al botón de eliminar
     const deleteButton = document.getElementById('delete-group-button');
     deleteButton.addEventListener('click', deleteFirstMessage);
