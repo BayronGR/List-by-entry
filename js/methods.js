@@ -85,23 +85,52 @@ async function getGroups() {
     }
   }
   
-  function createMessage(title, body) {
-    const article = document.createElement('article');
-    article.className = "message is-info"; // Cambiar a "is-dark" si prefieres
-  
-    const header = document.createElement('div');
-    header.className = "message-header";
-    header.innerHTML = `<p>${title}</p>`; // Solo muestra el título
-  
-    const bodyDiv = document.createElement('div');
-    bodyDiv.className = "message-body";
-    bodyDiv.textContent = body;
-  
-    article.appendChild(header);
-    article.appendChild(bodyDiv);
-  
-    document.getElementById('messages-container').appendChild(article);
-  }
+  async function updateDateById(id, date) {
+    try {
+        const scriptUrl = 'https://script.google.com/macros/s/AKfycbzvzVLT17uxqbLK2DcpxhqswxBrEPZ_e7r3v7ejOpPna2KqWZrOeloKKxEGUQODLXaFXw/exec'; // URL de tu script
+        const response = await fetch(scriptUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ id: id, date: date }), // Cuerpo de la solicitud
+        });
+
+        if (!response.ok) {
+            throw new Error("Error en la solicitud de actualización");
+        }
+
+        const result = await response.json(); 
+        console.log(result); // Verifica la respuesta del servidor
+    } catch (error) {
+        console.error("Error al actualizar la fecha:", error);
+    }
+}
+
+function createMessage(id, title, body) {
+  const article = document.createElement('article');
+  article.className = "message is-info"; // Cambiar a "is-dark" si prefieres
+
+  const header = document.createElement('div');
+  header.className = "message-header";
+  header.innerHTML = `<p>${title}</p>`; // Solo muestra el título
+
+  const bodyDiv = document.createElement('div');
+  bodyDiv.className = "message-body";
+  bodyDiv.textContent = body;
+
+  // Crear un párrafo oculto que contiene el ID
+  const hiddenParagraph = document.createElement('p');
+  hiddenParagraph.style.display = 'none'; // Ocultar el párrafo
+  hiddenParagraph.textContent = id; // Almacena el ID en el párrafo oculto
+  hiddenParagraph.id = 'message-id'
+
+  article.appendChild(header);
+  article.appendChild(bodyDiv);
+  article.appendChild(hiddenParagraph); // Agregar el párrafo oculto al artículo
+
+  document.getElementById('messages-container').appendChild(article);
+}
 
 
   function deleteFirstMessage() {
@@ -133,7 +162,7 @@ async function getGroups() {
   
     console.log(messages); // Para verificar que se obtienen los mensajes
   
-    messages.forEach(msg => createMessage(msg.title, msg.body));
+    messages.forEach(msg => createMessage(msg.id, msg.title, msg.body));
 
     loadingElement.style.display = 'none';
 
