@@ -1,111 +1,151 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Solicitud de Asistencia</title>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"
-    />
-    <style>
-    .section {
-      background-color: #f5f5f5;
-    }
-    .container {
-      color: #333333;
-    }
-    .title {
-      color: #33cc33
-    }
-    #form {
-      background-color: #e0e0e0;
-    }
-  </style>  </head>
-  <body>
-    <section class="section">
-      <div class="container">
-        <h1 class="title">Solicitar Asistencia</h1>
-        <form id="form" class="box" method="POST">
-          <div class="field">
-            <label class="label">Número de mesa</label>
-            <div class="control">
-              <input
-                class="input"
-                type="text"
-                placeholder="Escriba su número de mesa"
-                name="Numero de mesa"
-                required
-              />
-            </div>
-          </div>
+<html lang="es">
 
-          <div class="field">
-            <label class="label">Ayuda o Revisión</label>
-            <div class="control">
-              <label class="radio">
-                <input
-                  type="radio"
-                  name="Ayuda o revision"
-                  value="Ayuda"
-                  required
-                />
-                Ayuda
-              </label>
-              <label class="radio">
-                <input
-                  type="radio"
-                  name="Ayuda o revision"
-                  value="Revisión"
-                  required
-                />
-                Revisión
-              </label>
-            </div>
-          </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Solicitud de Asistencia</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" />
+  <link rel="stylesheet" href="cs/index.css">
+</head>
 
-          <div class="field">
-            <label class="label">Detalles</label>
-            <div class="control">
-              <textarea
-                class="textarea"
-                placeholder="Información adicional que necesite saber el profesor"
-                name="Notas"
-              ></textarea>
-            </div>
+<body>
+  <section class="section">
+    <div class="container">
+      <h1 class="title">Solicitar Asistencia</h1>
+      <form id="form" class="box" method="POST">
+        <div class="field">
+          <label class="label">Número de mesa</label>
+          <div class="control">
+            <input
+              class="input"
+              type="text"
+              id="mesa"
+              placeholder="Escriba su número de mesa"
+              name="Numero de mesa"
+              required
+              oninput="validateNumber(event)"
+            />
           </div>
+        </div>
 
-          <div class="field is-grouped">
-            <div class="control">
-              <button
-                class="button is-primary"
-                type="submit"
-                id="submit-button"
-              >
-                Enviar
-              </button>
-            </div>
-            <div class="control">
-              <button class="button is-danger" type="reset">Cancelar</button>
-            </div>
+        <div class="field">
+          <label class="label">Ayuda o Revisión</label>
+          <div class="control">
+            <label class="radio">
+              <input type="radio" name="Ayuda o revision" value="Ayuda" required />
+              Ayuda
+            </label>
+            <label class="radio">
+              <input type="radio" name="Ayuda o revision" value="Revisión" required />
+              Revisión
+            </label>
           </div>
-        </form>
+        </div>
 
-        <div
-          id="message"
-          style="
-            display: none;
-            margin: 20px;
-            font-weight: bold;
-            color: green;
-            padding: 8px;
-            background-color: beige;
-            border-radius: 4px;
-            border-color: aquamarine;
-          "
-        ></div>
+        <div class="field">
+          <label class="label">Detalles</label>
+          <div class="control">
+            <textarea class="textarea" placeholder="Información adicional que necesite saber el profesor" name="Notas"></textarea>
+          </div>
+        </div>
+
+        <div class="field is-grouped">
+          <div class="control">
+            <button class="button is-primary" type="submit" id="submit-button">
+              Enviar
+            </button>
+          </div>
+          <div class="control">
+            <button class="button is-danger" type="reset">Cancelar</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- Modal de éxito -->
+  <div class="modal" id="successModal">
+    <div class="modal-background"></div>
+    <div class="modal-content">
+      <div class="box has-text-centered">
+        <h3 class="title is-3">¡Éxito!</h3>
+        <p>Los datos se han enviado correctamente.</p>
+        <button class="button is-success" id="closeSuccessModal">Cerrar</button>
       </div>
-    </section>
-    <script async defer  src="/js/index.js"></script>
-  </body>
+    </div>
+    <button class="modal-close is-large" aria-label="close" id="closeSuccessModal"></button>
+  </div>
+
+  <!-- Modal de error -->
+  <div class="modal" id="errorModal">
+    <div class="modal-background"></div>
+    <div class="modal-content">
+      <div class="box has-text-centered">
+        <h3 class="title is-3">¡Error!</h3>
+        <p>Hubo un problema al enviar los datos. Intente de nuevo.</p>
+        <button class="button is-danger" id="closeErrorModal">Cerrar</button>
+      </div>
+    </div>
+    <button class="modal-close is-large" aria-label="close" id="closeErrorModal"></button>
+  </div>
+
+  <script>
+    // Función para validar que solo se ingresen números
+    function validateNumber(event) {
+      var input = event.target;
+      // Reemplaza cualquier valor que no sea un número o un espacio
+      input.value = input.value.replace(/[^0-9]/g, '');
+    }
+
+    // Función para manejar el envío del formulario
+    document.getElementById("form").addEventListener("submit", function (event) {
+      event.preventDefault(); // Evitar el comportamiento por defecto del formulario
+
+      // Obtener los valores del formulario
+      var mesa = document.getElementById('mesa').value;
+
+      // Añadir la palabra "Mesa" al valor del campo "Número de mesa"
+      mesa = 'Mesa ' + mesa;  // Aquí agregamos "Mesa " al inicio
+
+      var ayudaRevisión = document.querySelector('input[name="Ayuda o revision"]:checked').value;
+      var detalles = document.querySelector('textarea[name="Notas"]').value;
+
+      // Crear un objeto con los datos del formulario
+      var formData = new FormData();
+      formData.append("Numero de mesa", mesa);  // Ahora "Mesa X"
+      formData.append("Ayuda o revision", ayudaRevisión);
+      formData.append("Notas", detalles);
+
+      // Enviar los datos al Google Apps Script (Web App)
+      fetch('https://script.google.com/macros/s/AKfycbwjY8onaeod5Oyqu8fGehQOS1iOTBJYqSdnS5SCfS38_n1K-JAl2Q-t_IenKtQFieI4/exec', {  // Sustituye con la URL de tu Web App
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.text())
+      .then(data => {
+        // Mostrar el modal de éxito
+        console.log(data); // Respuesta del script
+        document.getElementById("successModal").classList.add('is-active');
+        document.getElementById("form").reset();  // Limpiar el formulario después de enviar
+      })
+      .catch(error => {
+        // Mostrar el modal de error
+        console.error('Error:', error);
+        document.getElementById("errorModal").classList.add('is-active');
+      });
+    });
+
+    // Cerrar el modal de éxito
+    document.getElementById("closeSuccessModal").addEventListener("click", function () {
+      document.getElementById("successModal").classList.remove('is-active');
+    });
+
+    // Cerrar el modal de error
+    document.getElementById("closeErrorModal").addEventListener("click", function () {
+      document.getElementById("errorModal").classList.remove('is-active');
+    });
+  </script>
+
+</body>
 </html>
