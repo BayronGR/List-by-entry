@@ -61,34 +61,22 @@
           </div>
         </div>
       </form>
+
+      <div
+          id="message"
+          style="
+            display: none;
+            margin: 20px;
+            font-weight: bold;
+            color: green;
+            padding: 8px;
+            background-color: beige;
+            border-radius: 4px;
+            border-color: aquamarine;
+          "
+        ></div>
     </div>
   </section>
-
-  <!-- Modal de éxito -->
-  <div class="modal" id="successModal">
-    <div class="modal-background"></div>
-    <div class="modal-content">
-      <div class="box has-text-centered">
-        <h3 class="title is-3">¡Éxito!</h3>
-        <p>Los datos se han enviado correctamente.</p>
-        <button class="button is-success" id="closeSuccessModal">Cerrar</button>
-      </div>
-    </div>
-    <button class="modal-close is-large" aria-label="close" id="closeSuccessModal"></button>
-  </div>
-
-  <!-- Modal de error -->
-  <div class="modal" id="errorModal">
-    <div class="modal-background"></div>
-    <div class="modal-content">
-      <div class="box has-text-centered">
-        <h3 class="title is-3">¡Error!</h3>
-        <p>Hubo un problema al enviar los datos. Intente de nuevo.</p>
-        <button class="button is-danger" id="closeErrorModal">Cerrar</button>
-      </div>
-    </div>
-    <button class="modal-close is-large" aria-label="close" id="closeErrorModal"></button>
-  </div>
 
   <script>
     // Función para validar que solo se ingresen números
@@ -99,9 +87,11 @@
     }
 
     // Función para manejar el envío del formulario
-    document.getElementById("form").addEventListener("submit", function (event) {
+      document.getElementById("form").addEventListener("submit", function (event) {
       event.preventDefault(); // Evitar el comportamiento por defecto del formulario
-
+      document.getElementById("message").textContent = "Enviando...";
+      document.getElementById("message").style.display = "block";
+      document.getElementById("submit-button").disabled = true;
       // Obtener los valores del formulario
       var mesa = document.getElementById('mesa').value;
 
@@ -124,15 +114,28 @@
       })
       .then(response => response.text())
       .then(data => {
-        // Mostrar el modal de éxito
-        console.log(data); // Respuesta del script
-        document.getElementById("successModal").classList.add('is-active');
-        document.getElementById("form").reset();  // Limpiar el formulario después de enviar
+        document.getElementById("message").textContent =
+              "Datos enviados correctamente!";
+            document.getElementById("message").style.display = "block";
+            document.getElementById("message").style.backgroundColor = "green";
+            document.getElementById("message").style.color = "white";
+            document.getElementById("submit-button").disabled = false;
+            document.getElementById("form").reset();
+
+            setTimeout(function () {
+              document.getElementById("message").style.display = "none";
+            }, 3000);
       })
       .catch(error => {
         // Mostrar el modal de error
-        console.error('Error:', error);
-        document.getElementById("errorModal").classList.add('is-active');
+        // Mensaje de error
+        console.error(error);
+        document.getElementById("message").textContent =
+          "Ocurrió un error al enviar el formulario.";
+        document.getElementById("message").style.display = "block";
+        document.getElementById("message").style.backgroundColor = "red";
+        document.getElementById("message").style.color = "white";
+        document.getElementById("submit-button").disabled = false;
       });
     });
 
