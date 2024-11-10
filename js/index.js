@@ -21,7 +21,7 @@ document.getElementById("form").addEventListener("submit", function (e) {
       method: "POST",
       body: formDataString,
       headers: {
-        "Content-Type": "text/plain;charset=utf-8",
+        "Content-Type": "text/plain;charset=utf-8" 
       },
     }
   )
